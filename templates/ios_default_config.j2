@@ -1,0 +1,43 @@
+aaa new-model
+!
+service timestamps debug datetime msec
+service timestamps log datetime msec
+service password-encryption
+!
+hostname {{ hostname }}
+!
+boot-start-marker
+boot-end-marker
+!
+aaa new-model
+!
+aaa authentication login default local
+aaa authorization exec default local
+!
+aaa session-id common
+!
+ip domain name {{ domain }}
+!
+username {{ ansible_user }}  privilege 15 secret 0 {{ ansible_password }}
+!
+ip ssh version 2
+!
+interface {{ dhcp_iface }}
+ description IDSTarget
+ ip address dhcp
+ duplex auto
+ speed auto
+ no keepalive
+!
+
+no ip http server
+no ip http secure-server
+
+line con 0
+ timeout login response 240
+line aux 0
+line vty 0 5
+ timeout login response 240
+ transport input ssh
+!
+end

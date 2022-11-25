@@ -1,0 +1,5 @@
+[control]
+localhost
+
+[ios_routers]
+10.0.0.100

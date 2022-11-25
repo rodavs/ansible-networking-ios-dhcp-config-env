@@ -1,0 +1,19 @@
+ntp_server: localhost
+dhcp_server: localhost
+tftp_server: localhost
+tftp_dir: /var/srv/pxe/tftp
+dhcp_iface_name: "enp1s0" 
+dhcp_iface_addr: 10.0.0.1/24
+dhcp_network: 10.0.0.0/24
+tftp_iface_name: "enp1s0"
+tftp_iface_addr: 10.0.0.1/24
+tftp_network: 10.0.0.0/24
+dhcp_iface: "fa 0"
+dhcp_iface_desc: "MGMT_INT"
+domain: router-config.net
+hostname: Router1
+PXE_Hosts:
+  - name: Router1
+    EthAddr: "00:07:7d:55:92:ba" 
+    IP: 10.0.0.100
+    Bootfile: "default-ios-config"

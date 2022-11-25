@@ -1,0 +1,126 @@
+---
+- name: Install tftpd-hpa {{ ansible_distribution }}
+  apt:
+    name: tftpd-hpa
+    state: present
+  when: 
+    - "tftp_server in inventory_hostname" 
+    - ansible_distribution == "Ubuntu"
+  become: yes
+
+- name: Install tftpd-hpa {{ ansible_distribution }}
+  yum:
+    name: tftpd-hpa
+    state: present
+  when:  
+    - "tftp_server in inventory_hostname"
+    - ansible_distribution == "RedHat"
+  become: yes
+
+- name: Install dhcp-server {{ ansible_distribution }}
+  apt:
+    name: isc-dhcp-server
+    state: present
+  when:  
+    - "dhcp_server in inventory_hostname"
+    - ansible_distribution == "Ubuntu"
+  become: yes
+
+
+- name: Install isc-dhcp-server {{ ansible_distribution }}
+  apt:
+    name: dhcp
+    state: present
+  when: 
+    - "dhcp_server in inventory_hostname"
+    - ansible_distribution == "RedHat"
+  become: yes
+
+- name: Setup Eth {{dhcp_iface_name}} for DHCP server
+  nmcli:
+   conn_name: "{{ dhcp_iface_name }}"
+   ip4: "{{ dhcp_iface_addr }}"
+   state: present
+   type: ethernet
+  when: "dhcp_server in inventory_hostname"
+  become: yes
+
+- name: Setup Eth {{tftp_iface_name}} for TFTP server
+  nmcli:
+    conn_name: "{{ tftp_iface_name }}"
+    ip4: "{{ tftp_iface_addr }}"
+    state: present
+    type: ethernet
+  when: "tftp_server in inventory_hostname"
+  become: yes
+    
+- name: Make directory structure {{ tftp_dir }}
+  command: mkdir -p {{ tftp_dir }}            
+  when: "tftp_server in inventory_hostname"
+  become: yes
+      
+- name: Setup DHCP config file
+  template:
+    src: templates/dhcp_conf_router.j2
+    dest: /etc/dhcp/dhcpd.conf
+    owner: root
+    group: root
+    mode: 0644
+  when: "dhcp_server in inventory_hostname"
+  become: yes
+
+- name: Setup TFTP config file {{ ansible_distribution }}
+  template:
+    src: templates/tftp_conf.j2
+    dest: /etc/default/tftpd-hpa
+    owner: root
+    group: root
+    mode: 0644
+  when: 
+    - "tftp_server in inventory_hostname"
+    - ansible_distribution == "Ubuntu"
+  become: yes      
+
+- name: Setup TFTP config file {{ ansible_distribution }}
+  template:
+    src: templates/tftp_conf_redhat.j2
+    dest: /usr/lib/systemd/system/tftp.service.d/override.conf
+    owner: root
+    group: root
+    mode: 0644
+  when:
+    - "tftp_server in inventory_hostname"
+    - ansible_distribution == "RedHat"
+  become: yes
+
+     
+- name: Create Bootfiles in TFTP directory
+  template:
+    src: templates/ios_default_config.j2
+    dest: "{{ tftp_dir }}/default-ios-config"
+    owner: root
+    group: root
+    mode: 0644
+  when: "tftp_server in inventory_hostname"
+  become: yes
+
+- name: Start and enable the DHCPD service
+  service:
+    name: isc-dhcp-server
+    enabled: true
+    state: restarted
+  when: 
+    - "dhcp_server in inventory_hostname"
+    - ansible_service_mgr == "systemd"
+  become: yes
+
+- name: Start and enable the TFTPD service
+  service:
+    name: tftpd-hpa
+    enabled: true
+    state: restarted
+  when: 
+    - "tftp_server in inventory_hostname"
+    - ansible_service_mgr == "systemd"
+  become: yes
+

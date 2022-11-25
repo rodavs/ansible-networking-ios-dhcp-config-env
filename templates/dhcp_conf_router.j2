@@ -1,0 +1,13 @@
+subnet {{ dhcp_network | ipaddr('network') }} netmask {{ dhcp_network | ipaddr('netmask') }} {}
+
+{% for host in PXE_Hosts %}
+
+host {{ host.name }} {
+  hardware ethernet {{ host.EthAddr }};
+  fixed-address {{ host.IP }};
+  option tftp-server-name "{{ tftp_iface_addr | ipaddr('address') }}";
+  option bootfile-name "{{ host.Bootfile }}";
+}
+
+{% endfor %}
+
