@@ -19,7 +19,7 @@ dhcp_iface_addr: 10.0.0.1/24	- Interface IP for DHCP Server
 dhcp_network: 10.0.0.0/24		  - DHCP network definition 
 tftp_iface_name: "enp1s0"		  - Change to interface name for the tftpd server facing devices to be configured
 tftp_iface_addr: 10.0.0.1/24	- Interface IP for DHCP Server, change if splitting out roles on seperate hosts
-tftp_network: 10.0.0.0/24	                	- TFTP netwrok definition
+tftp_network: 10.0.0.0/24	                	- TFTP network definition
 PXE_Hosts:				                          - Dict of routers to be configured
   - name: Router1			                      - Router Name
     EthAddr: "00:07:7d:55:92:ba" 	          - Mac Address of the router
